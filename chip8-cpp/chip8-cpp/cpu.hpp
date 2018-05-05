@@ -19,4 +19,5 @@ class CPU
 		unsigned char gfx[Constants::SCREEN_WIDTH * Constants::SCREEN_HEIGHT]; // Chip 8 screen size is usually 64 * 32
 		unsigned char delay_timer;
 		unsigned char sound_timer;
+		unsigned char key[16];
 };

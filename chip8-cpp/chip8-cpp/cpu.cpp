@@ -48,15 +48,7 @@ void CPU::cycle()
 			default:
 				printf("Unknown opcode [0x0000]: 0x%X\n", opcode);
 			}
-			break;
-		case 0x0004:
-			if (registers[(opcode & 0x00F0) >> 4] > (0xFF - registers[(opcode & 0x0F00) >> 8]))
-				registers[0xF] = 1; // carry flag
-			else
-				registers[0xF] = 0; // clear carry flag
-			registers[(opcode & 0x00F00) >> 8] += registers[(opcode & 0x00F0) >> 4];
-			pc += 2;
-			break;
+			break;		
 		case 0x2000:
 			stack[sp] = pc;
 			++sp;
@@ -68,6 +60,27 @@ void CPU::cycle()
 			memory[I + 2] = (registers[(opcode & 0x0F00) >> 8] % 100) % 10;
 			pc += 2;
 			break;
+		case 0x7000: //add vx, rr (immediate add)
+			registers[(opcode & 0x0F00) >> 8] += (opcode & 0x00FF);
+			pc += 2;
+			break;
+		case 0x8000:
+			switch (opcode & 0x000F)
+			{
+				case 0x0000: // Mov vx, vy
+					registers[(opcode & 0x0F00) >> 8] = registers[(opcode & 0x00F0) >> 4];
+					pc += 2;
+				case 0x0004: // Add vx, vy
+					if (registers[(opcode & 0x00F0) >> 4] > (0xFF - registers[(opcode & 0x0F00) >> 8]))
+						registers[0xF] = 1; // carry flag
+					else
+						registers[0xF] = 0; // clear carry flag
+					registers[(opcode & 0x0F00) >> 8] += registers[(opcode & 0x00F0) >> 4];
+					pc += 2;
+					break;
+				//case 0x0005: // Sub vx, vy
+				//	if ()
+			}
 		case 0xD000:
 		{
 			unsigned short x = registers[(opcode & 0x0F00) >> 8];
@@ -100,7 +113,7 @@ void CPU::cycle()
 				// EX9E: Skips the next instruction 
 				// if the key stored in VX is pressed
 			case 0x009E:
-				if (key[V[(opcode & 0x0F00) >> 8]] != 0)
+				if (key[registers[(opcode & 0x0F00) >> 8]] != 0)
 					pc += 4;
 				else
 					pc += 2;
