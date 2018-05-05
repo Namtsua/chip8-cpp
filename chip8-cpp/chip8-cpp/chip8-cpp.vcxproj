@@ -69,7 +69,14 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>C:\Users\Spencer Austman\Code\Git\chip8-cpp\chip8-cpp\chip8-cpp\OpenGL\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Users\Spencer Austman\Code\Git\chip8-cpp\chip8-cpp\chip8-cpp\OpenGL\Libraries;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <IncludePath>$(SolutionDir)\chip8-cpp\OpenGL\Include;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\chip8-cpp\OpenGL\Libraries;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -77,6 +84,9 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;SDL2.lib;SDL2_ttf.lib;SDL2_mixer-x64.lib;SDL2-x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -85,6 +95,9 @@
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
     </ClCompile>
+    <Link>
+      <AdditionalDependencies>opengl32.lib;glfw3.lib;SDL2.lib;SDL2_ttf.lib;SDL2_mixer-x64.lib;SDL2-x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -115,6 +128,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="chip8.cpp" />
+    <ClCompile Include="cpu.cpp" />
+    <ClCompile Include="gpu.cpp" />
+    <ClCompile Include="input.cpp" />
+    <ClCompile Include="mmu.cpp" />
+    <ClCompile Include="main.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="chip8.hpp" />
+    <ClInclude Include="constants.hpp" />
+    <ClInclude Include="cpu.hpp" />
+    <ClInclude Include="gpu.hpp" />
+    <ClInclude Include="input.hpp" />
+    <ClInclude Include="mmu.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
