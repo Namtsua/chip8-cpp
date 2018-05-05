@@ -70,6 +70,19 @@ void CPU::cycle()
 				case 0x0000: // Mov vx, vy
 					registers[(opcode & 0x0F00) >> 8] = registers[(opcode & 0x00F0) >> 4];
 					pc += 2;
+					break;
+				case 0x0001:
+					registers[(opcode & 0x0F00) >> 8] = registers[(opcode & 0x0F00) >> 8] | registers[(opcode & 0x00F0) >> 4];
+					pc += 2;
+					break;
+				case 0x0002:
+					registers[(opcode & 0x0F00) >> 8] = registers[(opcode & 0x0F00) >> 8] & registers[(opcode & 0x00F0) >> 4];
+					pc += 2;
+					break;
+				case 0x0003:
+					registers[(opcode & 0x0F00) >> 8] = registers[(opcode & 0x0F00) >> 8] ^ registers[(opcode & 0x00F0) >> 4];
+					pc += 2;
+					break;
 				case 0x0004: // Add vx, vy
 					if (registers[(opcode & 0x00F0) >> 4] > (0xFF - registers[(opcode & 0x0F00) >> 8]))
 						registers[0xF] = 1; // carry flag
@@ -78,8 +91,32 @@ void CPU::cycle()
 					registers[(opcode & 0x0F00) >> 8] += registers[(opcode & 0x00F0) >> 4];
 					pc += 2;
 					break;
-				//case 0x0005: // Sub vx, vy
-				//	if ()
+				case 0x0005: // Sub vx, vy
+					if (registers[(opcode & 0x00F0) >> 4] > (registers[(opcode & 0x0F00) >> 8]))
+						registers[0xF] = 0; // Borrow flag
+					else
+						registers[0xF] = 1;
+					registers[(opcode & 0x0F00) >> 8] -= registers[(opcode & 0x00F0) >> 4];
+					pc += 2;
+					break;
+				case 0x0006:
+					registers[0xF] = (registers[(opcode & 0x00F0) >> 4] & 0x000F) == 1 ? 1 : 0; //assume wiki is right
+					registers[(opcode & 0x0F00) >> 8] = registers[(opcode & 0x00F0) >> 4] >> 1;
+					pc += 2;
+					break;
+				case 0x0007:
+					if (registers[(opcode & 0x0F00) >> 8] > registers[(opcode & 0x00F0) >> 4])
+						registers[0xF] = 0;
+					else
+						registers[0xf] = 1;
+					registers[(opcode & 0x0F00) >> 8] = registers[(opcode & 0x0F00) >> 8] - registers[(opcode & 0x00F0) >> 4];
+					pc += 2;
+					break;
+				case 0x000E:
+					registers[0xF] = (registers[(opcode & 0x00F0) >> 4] & 0xF000) >= 8 ? 1 : 0;
+					registers[(opcode & 0x0F00) >> 8] = registers[(opcode & 0x00F0) >> 4] << 1;
+					pc += 2;
+					break;
 			}
 		case 0xD000:
 		{

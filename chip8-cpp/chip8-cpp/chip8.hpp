@@ -1,7 +1,6 @@
 #pragma once
 #include "constants.hpp"
 #include "cpu.hpp"
-#include "mmu.hpp"
 
 class Chip8
 {
