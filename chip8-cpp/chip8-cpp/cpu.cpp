@@ -39,25 +39,52 @@ void CPU::cycle()
 			switch (opcode & 0x000F)
 			{
 			case 0x0000: // 0x00E0: Clears the screen        
-						 // Execute opcode
+				for (int i = 0; i < (Constants::SCREEN_WIDTH * Constants::SCREEN_HEIGHT); i++)
+				{
+					gfx[i] = 0;
+				}
+				draw_flag = 1;
+				pc += 2;
 				break;
 
 			case 0x000E: // 0x00EE: Returns from subroutine          
 						 // Execute opcode
+				--sp;
+				pc = stack[sp];
+				pc += 2;
 				break;
-
-			default:
-				printf("Unknown opcode [0x0000]: 0x%X\n", opcode);
 			}
 			break;		
+		case 0x1000:
+			pc = opcode & 0x0FFF;
+			break;
 		case 0x2000:
 			stack[sp] = pc;
 			++sp;
 			pc = opcode & 0x0FFF;
 			break;
+		case 0x3000:
+			if (registers[(opcode & 0x0F00) >> 8] == (opcode & 0x00FF))
+				pc += 4;
+			else
+				pc += 2;
+			break;
+		case 0x4000:
+			if (registers[(opcode & 0x0F00) >> 8] != (opcode & 0x00FF))
+				pc += 4;
+			else
+				pc += 2;
+			break;
+		case 0x5000:
+			if (registers[(opcode & 0x0F00) >> 8] == registers[(opcode & 0x00F0) >> 4])
+				pc += 4;
+			else
+				pc += 2;
+			break;
 		case 0x6000:
 			registers[(opcode & 0x0F00) >> 8] = (opcode & 0x00FF);
 			pc += 2;
+			break;
 		case 0x7000: //add vx, rr (immediate add)
 			registers[(opcode & 0x0F00) >> 8] += (opcode & 0x00FF);
 			pc += 2;
@@ -116,6 +143,12 @@ void CPU::cycle()
 					pc += 2;
 					break;
 			}
+		case 0x9000:
+			if (registers[(opcode & 0x0F00) >> 8] != registers[(opcode & 0x00F0) >> 4])
+				pc += 4;
+			else
+				pc += 2;
+			break;
 		case 0xA000:
 			I = opcode & 0x0FFF;
 			pc += 2;
@@ -126,6 +159,7 @@ void CPU::cycle()
 		case 0xC000:
 			registers[(opcode & 0x0F00) >> 8] = (rand() % 255) & (opcode & 0x00FF);
 			pc += 2;
+			break;
 		case 0xD000:
 		{
 			unsigned short x = registers[(opcode & 0x0F00) >> 8];
@@ -150,6 +184,7 @@ void CPU::cycle()
 
 			draw_flag = true;
 			pc += 2;
+			break;
 		}
 		break;
 		case 0xE000:
@@ -157,49 +192,75 @@ void CPU::cycle()
 			{
 				// EX9E: Skips the next instruction 
 				// if the key stored in VX is pressed
-			case 0x009E:
-				if (key[registers[(opcode & 0x0F00) >> 8]] != 0)
-					pc += 4;
-				else
-					pc += 2;
-				break;
+				case 0x009E:
+					if (key[registers[(opcode & 0x0F00) >> 8]] != 0)
+						pc += 4;
+					else
+						pc += 2;
+					break;
+				case 0x00A1:
+					if (key[registers[(opcode & 0x0F00) >> 8]] == 0)
+						pc += 4;
+					else
+						pc += 2;
+					break;
 			}
 			break;
 		case 0xF000:
 			switch (opcode & 0x00FF)
 			{
 
-			case 0x0007:
-				registers[(opcode & 0x0F00) >> 8] = delay_timer;
-				pc += 2;
-			//case 0x000A:
-			case 0x0015:
-				delay_timer = registers[(opcode & 0x0F00) >> 8];
-				pc += 2;
-				break;
-			case 0x0018:
-				sound_timer = registers[(opcode & 0x0F00) >> 8];
-				pc += 2;
-				break;
-			case 0x001E:
-				I += registers[(opcode & 0x0F00) >> 8];
-				pc += 2;
-			case 0x0033:
-				memory[I] = registers[(opcode & 0x0F00) >> 8] / 100;
-				memory[I + 1] = (registers[(opcode & 0x0F00) >> 8] / 10) & 10;
-				memory[I + 2] = (registers[(opcode & 0x0F00) >> 8] % 100) % 10;
-				pc += 2;
-				break;
-			case 0x0055:
-				for (int i = 0; i < ((opcode & 0x0F00) >> 8); i++) 
-					memory[I + i] = registers[i];
-				pc += 2;
-				break;
-			case 0x0065:
-				for (int i = 0; i < ((opcode & 0x0F00) >> 8); i++)
-					registers[i] = memory[I + i];
-				pc += 2;
-				break;
+				case 0x0007:
+					registers[(opcode & 0x0F00) >> 8] = delay_timer;
+					pc += 2;
+					break;
+				case 0x000A:
+				{ // create new scope for key_pressed
+					bool key_pressed = false;
+					for (int i = 0; i < Constants::KEYPAD_COUNT; i++)
+					{
+						if (key[i] != 0) // A key has been pressed
+						{
+							registers[(opcode & 0x0F00) >> 8] = i;
+							key_pressed = true;
+						}
+					}
+					if (!key_pressed) return;
+					pc += 2;
+					break;
+				}
+				case 0x0015:
+					delay_timer = registers[(opcode & 0x0F00) >> 8];
+					pc += 2;
+					break;
+				case 0x0018:
+					sound_timer = registers[(opcode & 0x0F00) >> 8];
+					pc += 2;
+					break;
+				case 0x001E:
+					I += registers[(opcode & 0x0F00) >> 8];
+					pc += 2;
+					break;
+				case 0x0029:
+					I = registers[(opcode & 0x0) >> 8] * 0x5;
+					pc += 2;
+					break;
+				case 0x0033:
+					memory[I] = registers[(opcode & 0x0F00) >> 8] / 100;
+					memory[I + 1] = (registers[(opcode & 0x0F00) >> 8] / 10) & 10;
+					memory[I + 2] = (registers[(opcode & 0x0F00) >> 8] % 100) % 10;
+					pc += 2;
+					break;
+				case 0x0055:
+					for (int i = 0; i < ((opcode & 0x0F00) >> 8); i++) 
+						memory[I + i] = registers[i];
+					pc += 2;
+					break;
+				case 0x0065:
+					for (int i = 0; i < ((opcode & 0x0F00) >> 8); i++)
+						registers[i] = memory[I + i];
+					pc += 2;
+					break;
 			}
 			break;
 		default:
@@ -218,3 +279,7 @@ void CPU::cycle()
 
 }
 
+const bool& CPU::getDrawFlag() const
+{
+	return draw_flag;
+}

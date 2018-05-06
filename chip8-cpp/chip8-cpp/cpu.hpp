@@ -6,7 +6,7 @@ class CPU
 	public:
 		void initialize();
 		void cycle();
-		bool draw_flag;
+		const bool& getDrawFlag() const;
 		
 	private:
 		unsigned char registers[Constants::REGISTER_COUNT]; // 16 8-bit registers (last is flag)
@@ -20,4 +20,5 @@ class CPU
 		unsigned char delay_timer;
 		unsigned char sound_timer;
 		unsigned char key[16];
+		bool draw_flag;
 };

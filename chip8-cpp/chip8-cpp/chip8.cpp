@@ -12,6 +12,6 @@ void Chip8::emulateCycle()
 	m_cpu.cycle();
 }
 
-bool Chip8::getDrawFlag() const { return false; }
+bool Chip8::getDrawFlag() const { return m_cpu.getDrawFlag(); }
 
 void Chip8::setKeys() {}
