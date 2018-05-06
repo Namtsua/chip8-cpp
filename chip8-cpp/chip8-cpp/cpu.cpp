@@ -26,6 +26,7 @@ void CPU::initialize()
 	opcode = 0;      // Reset current opcode	
 	I = 0;      // Reset index register
 	sp = 0;      // Reset stack pointer
+	srand(time(NULL)); // Seed random number
 }
 
 void CPU::cycle()
@@ -54,12 +55,9 @@ void CPU::cycle()
 			++sp;
 			pc = opcode & 0x0FFF;
 			break;
-		case 0x0033:
-			memory[I] = registers[(opcode & 0x0F00) >> 8] / 100;
-			memory[I + 1] = (registers[(opcode & 0x0F00) >> 8] / 10) & 10;
-			memory[I + 2] = (registers[(opcode & 0x0F00) >> 8] % 100) % 10;
+		case 0x6000:
+			registers[(opcode & 0x0F00) >> 8] = (opcode & 0x00FF);
 			pc += 2;
-			break;
 		case 0x7000: //add vx, rr (immediate add)
 			registers[(opcode & 0x0F00) >> 8] += (opcode & 0x00FF);
 			pc += 2;
@@ -118,6 +116,16 @@ void CPU::cycle()
 					pc += 2;
 					break;
 			}
+		case 0xA000:
+			I = opcode & 0x0FFF;
+			pc += 2;
+			break;
+		case 0xB000:
+			pc = (opcode & 0x0FFF) + registers[0x0];
+			break;
+		case 0xC000:
+			registers[(opcode & 0x0F00) >> 8] = (rand() % 255) & (opcode & 0x00FF);
+			pc += 2;
 		case 0xD000:
 		{
 			unsigned short x = registers[(opcode & 0x0F00) >> 8];
@@ -154,6 +162,43 @@ void CPU::cycle()
 					pc += 4;
 				else
 					pc += 2;
+				break;
+			}
+			break;
+		case 0xF000:
+			switch (opcode & 0x00FF)
+			{
+
+			case 0x0007:
+				registers[(opcode & 0x0F00) >> 8] = delay_timer;
+				pc += 2;
+			//case 0x000A:
+			case 0x0015:
+				delay_timer = registers[(opcode & 0x0F00) >> 8];
+				pc += 2;
+				break;
+			case 0x0018:
+				sound_timer = registers[(opcode & 0x0F00) >> 8];
+				pc += 2;
+				break;
+			case 0x001E:
+				I += registers[(opcode & 0x0F00) >> 8];
+				pc += 2;
+			case 0x0033:
+				memory[I] = registers[(opcode & 0x0F00) >> 8] / 100;
+				memory[I + 1] = (registers[(opcode & 0x0F00) >> 8] / 10) & 10;
+				memory[I + 2] = (registers[(opcode & 0x0F00) >> 8] % 100) % 10;
+				pc += 2;
+				break;
+			case 0x0055:
+				for (int i = 0; i < ((opcode & 0x0F00) >> 8); i++) 
+					memory[I + i] = registers[i];
+				pc += 2;
+				break;
+			case 0x0065:
+				for (int i = 0; i < ((opcode & 0x0F00) >> 8); i++)
+					registers[i] = memory[I + i];
+				pc += 2;
 				break;
 			}
 			break;
