@@ -22,7 +22,7 @@ unsigned char chip8_fontset[80] =
 
 void CPU::initialize()
 {
-	pc = 0x200;  // Program counter starts at 0x200
+	pc = Constants::PROGRAM_START;  // Program counter starts at 0x200
 	opcode = 0;      // Reset current opcode	
 	I = 0;      // Reset index register
 	sp = 0;      // Reset stack pointer

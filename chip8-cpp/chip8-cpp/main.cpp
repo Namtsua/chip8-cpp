@@ -49,7 +49,11 @@ int main(int argc, char* argv)
 	}*/
 
 	chip8.initialize();
-	chip8.loadGame("./roms/tetris.rom");
+	if (!chip8.loadGame("./roms/tetris.rom"))
+	{
+		fprintf(stderr, "Failed to load ROM");
+		return EXIT_FAILURE;
+	}
 
 	// render loop
 	while (!glfwWindowShouldClose(window)) 

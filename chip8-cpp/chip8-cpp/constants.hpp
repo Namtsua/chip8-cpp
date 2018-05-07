@@ -2,6 +2,8 @@
 #include <string>
 #include <glad\glad.h>
 #include <GLFW\glfw3.h>
+#include <iostream>
+#include <fstream>
 
 #define SDL_MAIN_HANDLED
 #include <SDL/SDL.h>
@@ -18,4 +20,5 @@ namespace Constants
 	const int REGISTER_COUNT = 16;
 	const int STACK_SIZE = 16;
 	const int KEYPAD_COUNT = 16;
+	const int PROGRAM_START = 0x200;
 }

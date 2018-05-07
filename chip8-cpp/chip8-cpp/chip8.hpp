@@ -2,6 +2,8 @@
 #include "constants.hpp"
 #include "cpu.hpp"
 
+using namespace std;
+
 class Chip8
 {
 	public:
