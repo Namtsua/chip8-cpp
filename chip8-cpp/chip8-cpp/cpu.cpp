@@ -157,7 +157,7 @@ void CPU::cycle()
 					break;
 
 				case 0x0006:
-					registers[0xF] = registers[(opcode & 0x0F00) >> 8] & 0x1;
+					registers[0xF] = registers[(opcode & 0x0F00) >> 8] & 0x0001;
 					registers[(opcode & 0x0F00) >> 8] >>= 1;
 					pc += 2;
 					break;
@@ -313,14 +313,12 @@ void CPU::cycle()
 				case 0x0055:
 					for (int i = 0; i < ((opcode & 0x0F00) >> 8); i++) 
 						memory[I + i] = registers[i];
-					I += ((opcode & 0x0F00) >> 8) + 1;
 					pc += 2;
 					break;
 
 				case 0x0065:
 					for (int i = 0; i < ((opcode & 0x0F00) >> 8); i++)
 						registers[i] = memory[I + i];
-					I += ((opcode & 0x0F00) >> 8) + 1;
 					pc += 2;
 					break;
 
