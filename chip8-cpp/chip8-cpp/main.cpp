@@ -1,52 +1,51 @@
 #include "constants.hpp"
 #include "chip8.hpp"
-#include <stb\stb_image.h>
-#include <thread>
-#include <SDL/SDL_mixer.h>
 
 Chip8 chip8;
 
 using namespace std;
-GLFWwindow* window;
+const int& window_height = 512;
+const int& window_width = 1024;
 
 int main(int argc, char* argv)
 {
 
-	if (!glfwInit())
+	// SDL Window
+	SDL_Window* window = NULL;
+
+	// SDL Renderer
+	SDL_Renderer* renderer = NULL;
+
+	// Texture for the window
+	SDL_Texture* texture = NULL;;
+
+	if (SDL_Init(SDL_INIT_EVERYTHING) < 0)
 	{
-		fprintf(stderr, "Failed to initialize GLFW");
-		return false;
+		fprintf(stderr, "Failed to initialize SDL");
+		exit(1);
 	}
 
-	// Get system resolution
-	int w = 400;
-	int h = 400;
-
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-	glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, 1);
-	glfwWindowHint(GLFW_RESIZABLE, 0);
-
-	// Full screen & center
-	window = glfwCreateWindow(w, h, "Chip 8 Emulator", nullptr, nullptr);
-
-	if (window == nullptr)
+	window = SDL_CreateWindow("Chip8 Emulator", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, window_width, window_height, SDL_WINDOW_SHOWN);
+	if (window == NULL)
 	{
-		fprintf(stderr, "Failed to create GLFW window");
-		glfwTerminate();
-		return false;
+		fprintf(stderr, "SDL window could not be created!");
+		exit(1);
 	}
 
-	glfwMakeContextCurrent(window);
-	glfwSwapInterval(1); // vsync
-
-	// glad: load all OpenGL function pointers
-	/*if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
+	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	if (renderer == NULL)
 	{
-		fprintf(stderr, "Failed to initialize GLAD");
-		return false;
-	}*/
+		fprintf(stderr, "SDL renderer could not be created!");
+		exit(1);
+	}
+
+	texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, Constants::SCREEN_WIDTH, Constants::SCREEN_HEIGHT);
+	if (renderer == NULL)
+	{
+		fprintf(stderr, "SDL texture could not be created!");
+		exit(1);
+	}
+	
 
 	chip8.initialize();
 	if (!chip8.loadGame("./roms/tetris.rom"))
@@ -55,19 +54,28 @@ int main(int argc, char* argv)
 		return EXIT_FAILURE;
 	}
 
-	// render loop
-	while (!glfwWindowShouldClose(window)) 
-	{
-		// poll IO events (keys pressed/released, mouse moved etc.)
-		glfwPollEvents();
-		chip8.emulateCycle();
+	//// render loop
+	//while (!glfwWindowShouldClose(window)) 
+	//{
+	//	// poll IO events (keys pressed/released, mouse moved etc.)
+	//	glfwPollEvents();
+	//	chip8.emulateCycle();
 
-		//if (chip8.getDrawFlag()) 
+	//	//if (chip8.getDrawFlag()) 
+	//	chip8.setKeys();
+	//}
+
+	while (true)
+	{
+		chip8.emulateCycle();
+		if (chip8.getDrawFlag())
+		{
+			// do stuff
+		}
 		chip8.setKeys();
 	}
 
-	// terminate, clearing all previously allocated GLFW resources.
-	glfwTerminate();
+	SDL_Quit();
 
 	return EXIT_SUCCESS;
 }

@@ -1,13 +1,10 @@
 #pragma once
-#include <string>
-#include <glad\glad.h>
-#include <GLFW\glfw3.h>
-#include <iostream>
-#include <fstream>
-
 #define SDL_MAIN_HANDLED
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
+#include <string>
+#include <iostream>
+#include <fstream>
 #include <stdlib.h>
 #include <time.h>
 
