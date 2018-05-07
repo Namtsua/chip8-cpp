@@ -1,6 +1,6 @@
 #include "cpu.hpp"
 
-unsigned char chip8_fontset[80] =
+unsigned char fontset[Constants::FONT_COUNT] =
 {
 	0xF0, 0x90, 0x90, 0x90, 0xF0, // 0
 	0x20, 0x60, 0x20, 0x20, 0x70, // 1
@@ -27,6 +27,25 @@ void CPU::initialize()
 	I = 0;      // Reset index register
 	sp = 0;      // Reset stack pointer
 	srand(time(NULL)); // Seed random number
+	delay_timer = 0; // Reset delay timer
+	sound_timer = 0; // Reset sound timer
+	draw_flag = false; // Reset draw flag
+
+	for (int i = 0; i < Constants::REGISTER_COUNT; i++) // clear registers
+		registers[i] = 0;
+	for (int i = 0; i < Constants::MEMORY_SIZE; i++) // clear memory
+		memory[i] = 0;
+	for (int i = 0; i < Constants::STACK_SIZE; i++) // clear stack
+		stack[i] = 0;
+	for (int i = 0; i < (Constants::SCREEN_WIDTH * Constants::SCREEN_HEIGHT); i++) // clear screen
+		gfx[i] = 0;
+	for (int i = 0; i < Constants::KEYPAD_COUNT; i++) // clear keys
+		key[i] = 0;
+
+	for (int i = 0; i < Constants::FONT_COUNT; i++) // store font in memory
+		memory[i] = fontset[i];
+
+
 }
 
 void CPU::cycle()

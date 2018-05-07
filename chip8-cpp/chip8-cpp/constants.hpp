@@ -21,4 +21,5 @@ namespace Constants
 	const int STACK_SIZE = 16;
 	const int KEYPAD_COUNT = 16;
 	const int PROGRAM_START = 0x200;
+	const int FONT_COUNT = 80;
 }
