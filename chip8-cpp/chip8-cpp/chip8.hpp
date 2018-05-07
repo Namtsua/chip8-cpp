@@ -1,4 +1,3 @@
-#pragma once
 #include "constants.hpp"
 #include "cpu.hpp"
 
@@ -13,7 +12,6 @@ class Chip8
 		CPU& getCPU();
 		bool getDrawFlag() const;
 		void setDrawFlag(const bool& state);
-		void setKeys();
 	private:
 		CPU m_cpu;
 };

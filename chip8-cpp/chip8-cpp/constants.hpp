@@ -22,23 +22,3 @@ namespace Constants
 	const int PROGRAM_START = 0x200;
 	const int FONT_COUNT = 80;
 }
-
-const unsigned char keys[16] =
-{
-	SDLK_1,
-	SDLK_2,
-	SDLK_3,
-	SDLK_4,
-	SDLK_q,
-	SDLK_w,
-	SDLK_e,
-	SDLK_r,
-	SDLK_a,
-	SDLK_s,
-	SDLK_d,
-	SDLK_f,
-	SDLK_z,
-	SDLK_x,
-	SDLK_c,
-	SDLK_v
-};
