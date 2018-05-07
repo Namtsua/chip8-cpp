@@ -23,11 +23,12 @@ bool Chip8::loadGame(const string& file)
 	return true;
 }
 
-void Chip8::emulateCycle() 
-{
-	m_cpu.cycle();
-}
+void Chip8::emulateCycle() { m_cpu.cycle(); }
+
+CPU& Chip8::getCPU() { return m_cpu; }
 
 bool Chip8::getDrawFlag() const { return m_cpu.getDrawFlag(); }
+
+void Chip8::setDrawFlag(const bool& state) { m_cpu.setDrawFlag(state); }
 
 void Chip8::setKeys() {}

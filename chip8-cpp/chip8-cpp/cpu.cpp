@@ -29,8 +29,7 @@ void CPU::initialize()
 	srand(time(NULL)); // Seed random number
 	delay_timer = 0; // Reset delay timer
 	sound_timer = 0; // Reset sound timer
-	draw_flag = false; // Reset draw flag
-
+	
 	for (int i = 0; i < Constants::REGISTER_COUNT; i++) // clear registers
 		registers[i] = 0;
 	for (int i = 0; i < Constants::MEMORY_SIZE; i++) // clear memory
@@ -41,7 +40,6 @@ void CPU::initialize()
 		gfx[i] = 0;
 	for (int i = 0; i < Constants::KEYPAD_COUNT; i++) // clear keys
 		key[i] = 0;
-
 	for (int i = 0; i < Constants::FONT_COUNT; i++) // store font in memory
 		memory[i] = fontset[i];
 
@@ -57,21 +55,21 @@ void CPU::cycle()
 		case 0x0000:
 			switch (opcode & 0x000F)
 			{
-			case 0x0000: // 0x00E0: Clears the screen        
-				for (int i = 0; i < (Constants::SCREEN_WIDTH * Constants::SCREEN_HEIGHT); i++)
-				{
-					gfx[i] = 0;
-				}
-				draw_flag = 1;
-				pc += 2;
-				break;
+				case 0x0000: // 0x00E0: Clears the screen        
+					for (int i = 0; i < (Constants::SCREEN_WIDTH * Constants::SCREEN_HEIGHT); i++)
+					{
+						gfx[i] = 0;
+					}
+					draw_flag = true;
+					pc += 2;
+					break;
 
-			case 0x000E: // 0x00EE: Returns from subroutine          
-						 // Execute opcode
-				--sp;
-				pc = stack[sp];
-				pc += 2;
-				break;
+				case 0x000E: // 0x00EE: Returns from subroutine          
+							 // Execute opcode
+					--sp;
+					pc = stack[sp];
+					pc += 2;
+					break;
 			}
 			break;		
 		case 0x1000:
@@ -116,15 +114,15 @@ void CPU::cycle()
 					pc += 2;
 					break;
 				case 0x0001:
-					registers[(opcode & 0x0F00) >> 8] = registers[(opcode & 0x0F00) >> 8] | registers[(opcode & 0x00F0) >> 4];
+					registers[(opcode & 0x0F00) >> 8] |= registers[(opcode & 0x00F0) >> 4];
 					pc += 2;
 					break;
 				case 0x0002:
-					registers[(opcode & 0x0F00) >> 8] = registers[(opcode & 0x0F00) >> 8] & registers[(opcode & 0x00F0) >> 4];
+					registers[(opcode & 0x0F00) >> 8] &= registers[(opcode & 0x00F0) >> 4];
 					pc += 2;
 					break;
 				case 0x0003:
-					registers[(opcode & 0x0F00) >> 8] = registers[(opcode & 0x0F00) >> 8] ^ registers[(opcode & 0x00F0) >> 4];
+					registers[(opcode & 0x0F00) >> 8] ^= registers[(opcode & 0x00F0) >> 4];
 					pc += 2;
 					break;
 				case 0x0004: // Add vx, vy
@@ -144,8 +142,8 @@ void CPU::cycle()
 					pc += 2;
 					break;
 				case 0x0006:
-					registers[0xF] = (registers[(opcode & 0x00F0) >> 4] & 0x000F) == 1 ? 1 : 0; //assume wiki is right
-					registers[(opcode & 0x0F00) >> 8] = registers[(opcode & 0x00F0) >> 4] >> 1;
+					registers[0xF] = registers[(opcode & 0x0F00) >> 8] & 0x1; //assume wiki is right
+					registers[(opcode & 0x0F00) >> 8] >>= 1;
 					pc += 2;
 					break;
 				case 0x0007:
@@ -153,12 +151,12 @@ void CPU::cycle()
 						registers[0xF] = 0;
 					else
 						registers[0xf] = 1;
-					registers[(opcode & 0x0F00) >> 8] = registers[(opcode & 0x0F00) >> 8] - registers[(opcode & 0x00F0) >> 4];
+					registers[(opcode & 0x0F00) >> 8] = registers[(opcode & 0x00F0) >> 4] - registers[(opcode & 0x0F00) >> 8];
 					pc += 2;
 					break;
 				case 0x000E:
-					registers[0xF] = (registers[(opcode & 0x00F0) >> 4] & 0xF000) >= 8 ? 1 : 0;
-					registers[(opcode & 0x0F00) >> 8] = registers[(opcode & 0x00F0) >> 4] << 1;
+					registers[0xF] = registers[(opcode & 0x0F00) >> 8] >> 7;
+					registers[(opcode & 0x0F00) >> 8] <<= 1;
 					pc += 2;
 					break;
 			}
@@ -173,7 +171,7 @@ void CPU::cycle()
 			pc += 2;
 			break;
 		case 0xB000:
-			pc = (opcode & 0x0FFF) + registers[0x0];
+			pc = (opcode & 0x0FFF) + registers[0];
 			break;
 		case 0xC000:
 			registers[(opcode & 0x0F00) >> 8] = (rand() % 255) & (opcode & 0x00FF);
@@ -228,7 +226,6 @@ void CPU::cycle()
 		case 0xF000:
 			switch (opcode & 0x00FF)
 			{
-
 				case 0x0007:
 					registers[(opcode & 0x0F00) >> 8] = delay_timer;
 					pc += 2;
@@ -257,11 +254,15 @@ void CPU::cycle()
 					pc += 2;
 					break;
 				case 0x001E:
+					if (registers[(opcode & 0x0F00) >> 8] + I > 0xFFF) //check for overflow
+						registers[0xF] = 1;
+					else
+						registers[0xF] = 0;
 					I += registers[(opcode & 0x0F00) >> 8];
 					pc += 2;
 					break;
 				case 0x0029:
-					I = registers[(opcode & 0x0) >> 8] * 0x5;
+					I = registers[(opcode & 0x0F00) >> 8] * 0x5;
 					pc += 2;
 					break;
 				case 0x0033:
@@ -273,11 +274,13 @@ void CPU::cycle()
 				case 0x0055:
 					for (int i = 0; i < ((opcode & 0x0F00) >> 8); i++) 
 						memory[I + i] = registers[i];
+					I += ((opcode & 0x0F00) >> 8) + 1;
 					pc += 2;
 					break;
 				case 0x0065:
 					for (int i = 0; i < ((opcode & 0x0F00) >> 8); i++)
 						registers[i] = memory[I + i];
+					I += ((opcode & 0x0F00) >> 8) + 1;
 					pc += 2;
 					break;
 			}
@@ -301,4 +304,9 @@ void CPU::cycle()
 const bool& CPU::getDrawFlag() const
 {
 	return draw_flag;
+}
+
+void CPU::setDrawFlag(const bool& state)
+{
+	draw_flag = state;
 }
