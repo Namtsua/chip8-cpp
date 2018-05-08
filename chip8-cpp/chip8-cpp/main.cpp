@@ -51,7 +51,7 @@ int main(int argc, char* argv)
 		exit(1);
 	}
 
-	renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+	renderer = SDL_CreateRenderer(window, -1, 0);
 	if (renderer == NULL)
 	{
 		fprintf(stderr, "SDL renderer could not be created!");
@@ -68,7 +68,7 @@ int main(int argc, char* argv)
 	
 
 	chip8.initialize();
-	if (!chip8.loadGame("./roms/tetris.rom"))
+	if (!chip8.loadGame("./roms/pong.ch8"))
 	{
 		fprintf(stderr, "Failed to load ROM");
 		return EXIT_FAILURE;
@@ -80,6 +80,22 @@ int main(int argc, char* argv)
 	{
 		// Emulate a Chip8 CPU cycle
 		chip8.emulateCycle();
+
+		// Draw if we need to.
+		if (chip8.getDrawFlag())
+		{
+			chip8.setDrawFlag(false);
+			for (int i = 0; i < (Constants::SCREEN_WIDTH * Constants::SCREEN_HEIGHT); i++)
+			{
+				uint8_t pixel = cpu.gfx[i];
+				temp_pixels[i] = (0x00FFFFFF * pixel) | 0xFF000000;
+			}
+			SDL_UpdateTexture(texture, NULL, temp_pixels, 64 * sizeof(Uint32));
+			// Clear renderer and screen
+			SDL_RenderClear(renderer);
+			SDL_RenderCopy(renderer, texture, NULL, NULL);
+			SDL_RenderPresent(renderer);
+		}
 
 		SDL_Event e;
 		while (SDL_PollEvent(&e))
@@ -110,23 +126,6 @@ int main(int argc, char* argv)
 						cpu.key[i] = 0;
 				}
 			}
-		}
-
-
-		// Draw if we need to.
-		if (chip8.getDrawFlag())
-		{
-			chip8.setDrawFlag(false);
-			for (int i = 0; i < (Constants::SCREEN_WIDTH * Constants::SCREEN_HEIGHT); i++)
-			{
-				uint8_t pixel = cpu.gfx[i];
-				temp_pixels[i] = (0x00FFFFFF * pixel) | 0xFF000000;
-			}
-			SDL_UpdateTexture(texture, NULL, temp_pixels, 64 * sizeof(Uint32));
-			// Clear renderer and screen
-			SDL_RenderClear(renderer);
-			SDL_RenderCopy(renderer, texture, NULL, NULL);
-			SDL_RenderPresent(renderer);
 		}
 
 

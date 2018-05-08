@@ -62,17 +62,18 @@ void CPU::cycle()
 					pc += 2;
 					break;
 
-				case 0x000E: // 0x00EE: Returns from subroutine          
-							 // Execute opcode
+				case 0x000E: // 0x00EE: Returns from subroutine
 					--sp;
 					pc = stack[sp];
 					pc += 2;
 					break;
 				default:
 					fprintf(stderr, "Unknown opcode: 0x%X\n", opcode);
-					exit(1);
+					pc += 2;
+					break;
 			}
 			break;		
+
 
 		case 0x1000:
 			pc = opcode & 0x0FFF;
@@ -148,25 +149,25 @@ void CPU::cycle()
 					break;
 
 				case 0x0005: // Sub vx, vy
-					if (registers[(opcode & 0x00F0) >> 4] > (registers[(opcode & 0x0F00) >> 8]))
-						registers[0xF] = 0; // Borrow flag
-					else
+					if (registers[(opcode & 0x0F00) >> 8] > (registers[(opcode & 0x00F0) >> 4]))
 						registers[0xF] = 1;
+					else
+						registers[0xF] = 0;
 					registers[(opcode & 0x0F00) >> 8] -= registers[(opcode & 0x00F0) >> 4];
 					pc += 2;
 					break;
 
 				case 0x0006:
-					registers[0xF] = registers[(opcode & 0x0F00) >> 8] & 0x0001;
+					registers[0xF] = registers[(opcode & 0x0F00) >> 8] & 0x1;
 					registers[(opcode & 0x0F00) >> 8] >>= 1;
 					pc += 2;
 					break;
 
 				case 0x0007:
-					if (registers[(opcode & 0x0F00) >> 8] > registers[(opcode & 0x00F0) >> 4])
-						registers[0xF] = 0;
+					if (registers[(opcode & 0x00F0) >> 4] > registers[(opcode & 0x0F00) >> 8])
+						registers[0xF] = 1;
 					else
-						registers[0xf] = 1;
+						registers[0xf] = 0;
 					registers[(opcode & 0x0F00) >> 8] = registers[(opcode & 0x00F0) >> 4] - registers[(opcode & 0x0F00) >> 8];
 					pc += 2;
 					break;
@@ -179,8 +180,11 @@ void CPU::cycle()
 
 				default:
 					fprintf(stderr, "Unknown opcode: 0x%X\n", opcode);
-					exit(1);
+					pc += 2;
+					break;
 			}
+		break;
+
 		case 0x9000:
 			if (registers[(opcode & 0x0F00) >> 8] != registers[(opcode & 0x00F0) >> 4])
 				pc += 4;
@@ -198,7 +202,7 @@ void CPU::cycle()
 			break;
 
 		case 0xC000:
-			registers[(opcode & 0x0F00) >> 8] = (rand() % 256) & (opcode & 0x00FF);
+			registers[(opcode & 0x0F00) >> 8] = (rand() % 0xFF) & (opcode & 0x00FF);
 			pc += 2;
 			break;
 
@@ -226,8 +230,8 @@ void CPU::cycle()
 
 			draw_flag = true;
 			pc += 2;
-			break;
 		}
+		break;
 
 		case 0xE000:
 			switch (opcode & 0x00FF)
@@ -250,7 +254,8 @@ void CPU::cycle()
 
 				default:
 					fprintf(stderr, "Unknown opcode: 0x%X\n", opcode);
-					exit(1);
+					pc += 2;
+					break;
 
 			}
 			break;
@@ -290,7 +295,7 @@ void CPU::cycle()
 					break;
 
 				case 0x001E:
-					if (registers[(opcode & 0x0F00) >> 8] + I > 0xFFF) //check for overflow
+					if (I + registers[(opcode & 0x0F00) >> 8] > 0xFFF) //check for overflow
 						registers[0xF] = 1;
 					else
 						registers[0xF] = 0;
@@ -305,7 +310,7 @@ void CPU::cycle()
 
 				case 0x0033:
 					memory[I] = registers[(opcode & 0x0F00) >> 8] / 100;
-					memory[I + 1] = (registers[(opcode & 0x0F00) >> 8] / 10) & 10;
+					memory[I + 1] = (registers[(opcode & 0x0F00) >> 8] / 10) % 10;
 					memory[I + 2] = (registers[(opcode & 0x0F00) >> 8] % 100) % 10;
 					pc += 2;
 					break;
@@ -313,18 +318,21 @@ void CPU::cycle()
 				case 0x0055:
 					for (int i = 0; i < ((opcode & 0x0F00) >> 8); i++) 
 						memory[I + i] = registers[i];
+					I += ((opcode & 0x0F00) >> 8) + 1;
 					pc += 2;
 					break;
 
 				case 0x0065:
 					for (int i = 0; i < ((opcode & 0x0F00) >> 8); i++)
 						registers[i] = memory[I + i];
+					I += ((opcode & 0x0F00) >> 8) + 1;
 					pc += 2;
 					break;
 
 				default:
 					fprintf(stderr, "Unknown opcode: 0x%X\n", opcode);
-					exit(1);
+					pc += 2;
+					break;
 			}
 			break;
 		default:
