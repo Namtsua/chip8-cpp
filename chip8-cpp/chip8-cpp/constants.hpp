@@ -3,13 +3,13 @@
 #include <SDL/SDL.h>
 #include <SDL/SDL_ttf.h>
 #include <SDL/SDL_events.h>
+#include <SDL/SDL_mixer.h>
 #include <string>
 #include <iostream>
 #include <fstream>
 #include <stdlib.h>
 #include <time.h>
 #include <thread>
-
 
 namespace Constants
 {

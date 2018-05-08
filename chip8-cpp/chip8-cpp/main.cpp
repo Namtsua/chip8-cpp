@@ -1,8 +1,9 @@
 #include "chip8.hpp"
 #include "constants.hpp"
-Chip8 chip8;
 
 using namespace std;
+
+Chip8 chip8;
 const int& window_height = 512;
 const int& window_width = 1024;
 uint32_t temp_pixels[Constants::SCREEN_WIDTH * Constants::SCREEN_HEIGHT];
@@ -65,7 +66,6 @@ int main(int argc, char* argv)
 		fprintf(stderr, "SDL texture could not be created!");
 		exit(1);
 	}
-	
 
 	chip8.initialize();
 	if (!chip8.loadGame("./roms/pong.ch8"))
