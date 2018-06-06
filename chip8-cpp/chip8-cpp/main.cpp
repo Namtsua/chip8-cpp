@@ -61,7 +61,7 @@ int main(int argc, char* argv)
 	SDL_RenderSetLogicalSize(renderer, window_width, window_height);
 
 	texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_ARGB8888, SDL_TEXTUREACCESS_STREAMING, Constants::SCREEN_WIDTH, Constants::SCREEN_HEIGHT);
-	if (renderer == NULL)
+	if (texture == NULL)
 	{
 		fprintf(stderr, "SDL texture could not be created!");
 		exit(1);
